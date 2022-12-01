@@ -55,84 +55,33 @@
 - ![image](https://user-images.githubusercontent.com/102403656/205072019-dd9efb69-a9f2-4e5e-8275-a3b30a660309.png)
 - Количество эпох зависит нескольких факторов:
     - от weights(вес), значение которого мы получаем при успешном выполнении заданного условия и порогового значения, пройти который можно набрав определёнынй "вес"
-    - от логической фун
+    - от логической функции, поскольку разные задачи требует разного количества итераций для обучения
 
 
 ## Задание 3
-### Доработать сцену и обучить ML-Agent таким образом, чтобы шар перемещался между двумя кубами разного цвета.
-- Добавть ещё один куп в проект
-- Доработать скрипт для движения
-
+### Построить визуальную модель работы перцептрона на сцене Unity
+- Построить сцену, фиолетовый цвет - это едиица, зелёный - это ноль![image](https://user-images.githubusercontent.com/102403656/205114237-1b4897a2-1206-40af-a288-2ad1bf988201.png)
+- Дописать уже готовый скрикт(Perceptron) скрип
 ```c#
 
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Unity.MLAgents;
-using Unity.MLAgents.Sensors;
-using Unity.MLAgents.Actuators;
+private void OnTriggerEnter(Collider other) {
+		if (CalcOutput(Cube, Sphere) == 0) {
+			other.gameObject.GetComponent<Renderer>().material.color = new Color32(57, 225, 20, 255);
+		}
+		else {
+			other.gameObject.GetComponent<Renderer>().material.color = new Color32(176, 38, 255, 255);
+		}
+	}
 
-public class RollerAgent : Agent
-{
-    Rigidbody rBody;
-    // Start is called before the first frame update
-    void Start()
+	private void OnTriggerStay(Collider other)
     {
-        rBody = GetComponent<Rigidbody>();
+        other.attachedRigidbody.AddForce(Vector3.up * 3f);
     }
-
-    public Transform Target;
-    public Transform Target1;
-    public override void OnEpisodeBegin()
-    {
-        if (this.transform.localPosition.y < 0)
-        {
-            this.rBody.angularVelocity = Vector3.zero;
-            this.rBody.velocity = Vector3.zero;
-            this.transform.localPosition = new Vector3(0, 0.5f, 0);
-        }
-
-        Target.localPosition = new Vector3(Random.value * 8-4, 0.5f, Random.value * 8-4);
-        Target1.localPosition = new Vector3(Random.value * 8-4, 0.5f, Random.value * 8-4);
-    }
-    public override void CollectObservations(VectorSensor sensor)
-    {
-        sensor.AddObservation(Target.localPosition);
-        sensor.AddObservation(Target1.localPosition);
-        sensor.AddObservation(this.transform.localPosition);
-        sensor.AddObservation(rBody.velocity.x);
-        sensor.AddObservation(rBody.velocity.z);
-    }
-    public float forceMultiplier = 10;
-    public override void OnActionReceived(ActionBuffers actionBuffers)
-    {
-        Vector3 controlSignal = Vector3.zero;
-        controlSignal.x = actionBuffers.ContinuousActions[0];
-        controlSignal.z = actionBuffers.ContinuousActions[1];
-        rBody.AddForce(controlSignal * forceMultiplier);
-
-        float distanceToTarget = Vector3.Distance(this.transform.localPosition, Target.localPosition);
-        float distanceToTarget1 = Vector3.Distance(this.transform.localPosition, Target1.localPosition);
-
-        if(distanceToTarget < 1.42f || distanceToTarget1 < 1.42f)
-        {
-            SetReward(1.0f);
-            EndEpisode();
-        }
-        else if (this.transform.localPosition.y < 0)
-        {
-            EndEpisode();
-        }
-    }
-}
-
+    
 ```
-- Переобучить MlAgent![image](https://user-images.githubusercontent.com/102403656/198347668-be55f96d-81fe-409c-a787-0dbdd4854007.png)![image](https://user-images.githubusercontent.com/102403656/198347692-eba98971-b92c-4252-b26e-3ec87745d254.png)
-
-Результат:
-
-![Result1](https://user-images.githubusercontent.com/102403656/198347772-4753ed18-eee9-4a47-916a-f14c5b477b3d.gif)
-
+- Добавить скрипт ко всем элементам, и задать значения для той или иной логической операции
+- Провести тесты(в зависимости от того, в какой цвет окрасились фигуры после касание и проверятеся результат лог. операции)
+- Конкретный пример для логического OR: ![gif1](https://user-images.githubusercontent.com/102403656/205118348-e8847f80-4f48-474a-8845-d34b6c24df0a.gif)
 
 
 ## Выводы
